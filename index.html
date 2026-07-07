@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>化疗指标记录</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">本地保存 · 人工校对 · 趋势查看</p>
+        <h1>家人化疗指标记录</h1>
+      </div>
+      <div class="top-actions">
+        <button id="exportBtn" class="ghost">导出 CSV</button>
+        <button id="backupExportBtn" class="ghost">导出完整备份</button>
+        <button id="backupImportBtn" class="ghost">导入备份</button>
+        <input id="backupImportInput" type="file" accept="application/json,.json" hidden />
+        <button id="expandAllBtn" class="ghost">全部展开</button>
+        <button id="collapseAllBtn" class="ghost">全部折叠</button>
+        <button id="sampleBtn" class="ghost">载入示例</button>
+        <button id="clearBtn" class="danger">清空本机数据</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel cloud-panel">
+        <div class="section-head">
+          <div>
+            <h2>在线同步</h2>
+            <p id="cloudStatus">未登录时仅保存在当前浏览器本地。</p>
+          </div>
+        </div>
+        <div class="cloud-form">
+          <input id="cloudEmail" type="email" placeholder="邮箱" autocomplete="email" />
+          <input id="cloudPassword" type="password" placeholder="密码" autocomplete="current-password" />
+          <input id="familyCode" type="text" placeholder="家庭代码，例如 family-suibe" />
+          <button id="signInBtn" class="primary">登录</button>
+          <button id="signUpBtn" class="secondary">注册</button>
+          <button id="signOutBtn" class="ghost">退出</button>
+        </div>
+      </section>
+
+      <section class="panel entry-panel">
+        <div class="section-head">
+          <div>
+            <h2>本次录入</h2>
+            <p>从指标库加入指标后填写本次数值并保存。</p>
+          </div>
+          <span class="pill">本地</span>
+        </div>
+
+        <div class="form-grid">
+          <label>
+            检测日期
+            <input id="testDate" type="date" />
+          </label>
+          <label>
+            报告类型
+            <select id="reportType">
+              <option>血常规</option>
+              <option>肿瘤标志物</option>
+              <option>肝肾功能</option>
+              <option>电解质</option>
+              <option>其他</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row-actions">
+          <select id="categorySelect">
+            <option value="">选择指标类</option>
+          </select>
+          <button id="addCategoryToDraftBtn" class="secondary">加入该类指标</button>
+          <button id="addRowBtn" class="secondary">新增一行</button>
+          <button id="saveBtn" class="primary">保存本次记录</button>
+        </div>
+      </section>
+
+      <section class="panel review-panel">
+        <div class="section-head">
+          <div>
+            <h2>本次指标</h2>
+            <p>从指标库加入指标后只填写结果，单位、参考范围和状态自动带入。</p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>指标</th>
+                <th>结果</th>
+                <th>单位</th>
+                <th>参考范围</th>
+                <th>状态</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="draftBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel chart-panel">
+        <div class="section-head">
+          <div>
+            <h2>趋势图</h2>
+            <p>选择常看的指标，按检测日期查看变化。</p>
+          </div>
+        </div>
+        <div class="controls">
+          <label>
+            指标
+            <select id="metricSelect"></select>
+          </label>
+          <label>
+            时间范围
+            <select id="rangeSelect">
+              <option value="all">全部</option>
+              <option value="30">近 30 天</option>
+              <option value="90">近 90 天</option>
+              <option value="180">近 180 天</option>
+            </select>
+          </label>
+        </div>
+        <div id="chart" class="chart empty">暂无数据，先保存一次报告记录</div>
+      </section>
+
+      <section class="panel metrics-panel">
+        <div class="section-head">
+          <div>
+            <h2>指标库</h2>
+            <p>维护常用指标、单位和参考范围；可批量加入或批量删除。</p>
+          </div>
+        </div>
+        <div class="metric-form">
+          <input id="metricNameInput" type="text" placeholder="例如：总胆红素 TBIL" />
+          <input id="metricUnitInput" type="text" placeholder="单位，可选" />
+          <input id="metricMinInput" type="text" placeholder="最低值，可选" />
+          <input id="metricMaxInput" type="text" placeholder="最高值，可选" />
+          <button id="metricAddBtn" class="secondary">添加指标</button>
+          <button id="toggleAllMetricsBtn" class="ghost">全选</button>
+          <button id="addSelectedMetricsBtn" class="secondary">选中加入本次</button>
+          <button id="addAllMetricsBtn" class="primary">全部加入本次</button>
+          <button id="deleteSelectedMetricsBtn" class="danger">删除选中</button>
+        </div>
+        <div class="category-form">
+          <input id="categoryNameInput" type="text" placeholder="新建/更新指标类，例如：血常规" />
+          <button id="saveCategoryBtn" class="secondary">用选中指标保存为一类</button>
+        </div>
+        <div id="categoryLibrary" class="category-library"></div>
+        <div id="metricLibrary" class="metric-library"></div>
+      </section>
+
+      <section class="panel events-panel">
+        <div class="section-head">
+          <div>
+            <h2>治疗事件</h2>
+            <p>记录化疗开始时间、用药、升白针、发热等节点。</p>
+          </div>
+        </div>
+        <div class="event-form">
+          <input id="eventDate" type="date" />
+          <input id="eventTime" type="time" />
+          <select id="eventType">
+            <option>发现病情</option>
+            <option>初诊</option>
+            <option>手术</option>
+            <option>化疗</option>
+            <option>用药</option>
+            <option>升白针</option>
+            <option>发热</option>
+            <option>住院</option>
+            <option>复诊</option>
+            <option>其他</option>
+          </select>
+          <input id="eventCycle" type="text" placeholder="疗程/周期，例如：第 2 次化疗" />
+          <input id="eventText" type="text" placeholder="事件名称，例如：奥沙利铂输注 / 发热" />
+          <textarea id="eventDrugs" rows="2" placeholder="用药情况，可选，例如：奥沙利铂 + 卡培他滨"></textarea>
+          <textarea id="eventNote" rows="2" placeholder="备注，可选，例如：体温、症状、医生提醒"></textarea>
+          <button id="eventBtn" class="secondary">添加</button>
+        </div>
+        <ul id="eventList" class="event-list"></ul>
+      </section>
+
+      <section class="panel timeline-panel">
+        <div class="section-head">
+          <div>
+            <h2>完整情况</h2>
+            <p>按时间查看化疗、治疗事件和每次指标详情。</p>
+          </div>
+        </div>
+        <div id="cycleSummary" class="cycle-summary"></div>
+        <div id="timeline" class="timeline"></div>
+      </section>
+
+      <section class="panel records-panel">
+        <div class="section-head">
+          <div>
+            <h2>历史记录</h2>
+            <p>所有数据保存在当前浏览器本地。</p>
+          </div>
+        </div>
+        <div id="records" class="records"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
