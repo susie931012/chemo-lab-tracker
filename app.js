@@ -1,6 +1,6 @@
 const STORAGE_KEY = "chemo-lab-tracker-v1";
-const PANEL_STATE_KEY = "chemo-lab-tracker-panels-v1";
 const FAMILY_CODE_KEY = "chemo-lab-tracker-family-code";
+const ACTIVE_TAB_KEY = "chemo-lab-tracker-active-tab";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA_S8fS3qys5JIKrNjwgdJYVZuU-_bRDoE",
@@ -282,18 +282,6 @@ async function signOutCloud() {
   if (!firebaseAuth) return;
   await firebaseAuth.signOut();
   toast("已退出");
-}
-
-function loadPanelState() {
-  try {
-    return JSON.parse(localStorage.getItem(PANEL_STATE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function savePanelState(panelState) {
-  localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(panelState));
 }
 
 function uniqueMetricConfigs(metrics) {
@@ -1519,58 +1507,29 @@ function renderAll() {
   renderTimeline();
 }
 
-function panelKey(panel, index) {
-  return [...panel.classList].find((name) => name.endsWith("-panel")) || `panel-${index}`;
-}
-
-function updatePanelButton(panel) {
-  const button = panel.querySelector(".collapse-btn");
-  if (!button) return;
-  const collapsed = panel.classList.contains("collapsed");
-  button.textContent = collapsed ? "展开" : "折叠";
-  button.setAttribute("aria-expanded", String(!collapsed));
-}
-
-function setPanelCollapsed(panel, collapsed) {
-  panel.classList.toggle("collapsed", collapsed);
-  updatePanelButton(panel);
-  const states = loadPanelState();
-  states[panel.dataset.panelKey] = collapsed;
-  savePanelState(states);
-}
-
-function setupPanelCollapse() {
-  const states = loadPanelState();
-  document.querySelectorAll(".panel").forEach((panel, index) => {
-    const head = panel.querySelector(".section-head");
-    if (!head) return;
-    panel.dataset.panelKey = panel.dataset.panelKey || panelKey(panel, index);
-    if (!head.querySelector(".collapse-btn")) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "collapse-btn";
-      button.addEventListener("click", () => setPanelCollapsed(panel, !panel.classList.contains("collapsed")));
-      head.appendChild(button);
-    }
-    panel.classList.toggle("collapsed", Boolean(states[panel.dataset.panelKey]));
-    updatePanelButton(panel);
+function activateTab(tabName) {
+  const target = document.querySelector(`[data-tab-page="${tabName}"]`) ? tabName : "entry";
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    const active = button.dataset.tab === target;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-current", active ? "page" : "false");
   });
+  document.querySelectorAll("[data-tab-page]").forEach((page) => {
+    page.classList.toggle("active", page.dataset.tabPage === target);
+  });
+  localStorage.setItem(ACTIVE_TAB_KEY, target);
+  if (target === "chart") renderChart();
 }
 
-function setAllPanels(collapsed) {
-  document.querySelectorAll(".panel").forEach((panel) => {
-    panel.classList.toggle("collapsed", collapsed);
-    updatePanelButton(panel);
+function setupTabs() {
+  document.querySelectorAll("[data-tab]").forEach((button) => {
+    button.addEventListener("click", () => activateTab(button.dataset.tab));
   });
-  const states = {};
-  document.querySelectorAll(".panel").forEach((panel) => {
-    states[panel.dataset.panelKey] = collapsed;
-  });
-  savePanelState(states);
+  activateTab(localStorage.getItem(ACTIVE_TAB_KEY) || "entry");
 }
 
 function bindEvents() {
-  setupPanelCollapse();
+  setupTabs();
   el("testDate").value = today();
   el("eventDate").value = today();
   el("familyCode").value = localStorage.getItem(FAMILY_CODE_KEY) || "default-family";
@@ -1600,8 +1559,6 @@ function bindEvents() {
   el("backupExportBtn").addEventListener("click", exportBackup);
   el("backupImportBtn").addEventListener("click", () => el("backupImportInput").click());
   el("backupImportInput").addEventListener("change", (event) => importBackup(event.target.files[0]));
-  el("expandAllBtn").addEventListener("click", () => setAllPanels(false));
-  el("collapseAllBtn").addEventListener("click", () => setAllPanels(true));
   el("sampleBtn").addEventListener("click", loadSample);
   el("clearBtn").addEventListener("click", () => {
     if (!confirm("确认清空当前浏览器里的所有记录吗？")) return;
