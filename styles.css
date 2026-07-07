@@ -22,6 +22,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  -webkit-text-size-adjust: 100%;
 }
 
 button,
@@ -207,6 +208,7 @@ textarea {
 
 .table-wrap {
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -251,7 +253,8 @@ td select {
   border-radius: 8px;
   margin-top: 14px;
   background: #fbfdff;
-  overflow: hidden;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chart.empty {
@@ -573,6 +576,7 @@ td select {
   gap: 8px;
   padding: 18px 0 12px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .cycle-axis::before {
@@ -798,26 +802,135 @@ td select {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .top-actions {
+    width: 100%;
+  }
 }
 
 @media (max-width: 620px) {
+  body {
+    background: #fff;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  button {
+    min-height: 42px;
+    padding: 9px 11px;
+  }
+
+  .topbar {
+    gap: 14px;
+    padding: calc(14px + env(safe-area-inset-top)) 12px 14px;
+  }
+
+  .topbar h1 {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+  }
+
+  .layout {
+    gap: 10px;
+    padding: 10px 10px calc(22px + env(safe-area-inset-bottom));
+  }
+
+  .panel {
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .section-head h2 {
+    font-size: 18px;
+  }
+
+  .section-head p {
+    font-size: 13px;
+  }
+
+  .collapse-btn,
+  .pill {
+    justify-self: start;
+  }
+
+  .top-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .top-actions .danger {
+    grid-column: 1 / -1;
+  }
+
+  .cloud-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .cloud-form input {
+    grid-column: 1 / -1;
+  }
+
   .form-grid,
   .metric-form,
   .category-form,
   .event-form {
+    display: grid;
     grid-template-columns: 1fr;
+    gap: 9px;
   }
 
   .top-actions,
-  .row-actions,
-  .metric-chip,
   .controls {
     align-items: stretch;
-    flex-direction: column;
+  }
+
+  .row-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: stretch;
+  }
+
+  .row-actions select,
+  .row-actions .primary {
+    grid-column: 1 / -1;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
   }
 
   .metric-chip {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .metric-chip button {
+    width: 100%;
+    border-radius: 8px;
+    padding: 8px 10px;
   }
 
   .category-card,
@@ -833,7 +946,69 @@ td select {
     grid-template-columns: 1fr;
   }
 
-  button {
+  .event-list li,
+  .record-card {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .record-edit-head input,
+  .record-edit-head select {
     width: 100%;
+  }
+
+  table {
+    min-width: 610px;
+  }
+
+  .mini-table {
+    min-width: 520px;
+  }
+
+  th,
+  td {
+    padding: 8px 6px;
+  }
+
+  .chart {
+    min-height: 310px;
+  }
+
+  .chart svg {
+    width: 820px;
+    max-width: none;
+    height: 310px;
+  }
+
+  .cycle-axis {
+    grid-template-columns: repeat(var(--point-count), minmax(74px, 1fr));
+    gap: 6px;
+    padding-bottom: 10px;
+  }
+
+  .cycle-point {
+    min-width: 74px;
+  }
+
+  .point-label,
+  .point-label span {
+    max-width: 76px;
+  }
+
+  .cycle-card summary span {
+    display: block;
+    margin: 4px 0 0;
+  }
+
+  .toast {
+    left: 10px;
+    right: 10px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    transform: translateY(8px);
+    width: auto;
+  }
+
+  .toast.show {
+    transform: translateY(0);
   }
 }
